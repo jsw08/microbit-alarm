@@ -1,59 +1,83 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Microbit Timer</title>
-        <meta name="description" content="This web-app will sync with my microbit so i can use it as a timer with pc input.">
-        <meta name="viewport" content="width=device-width, initial-scale=1"> 
-        <link rel="stylesheet" href="/style.css">
-    </head>
-    <body>
-        <button id="connect">connect</button> <br><br>
-        <form action="" id="form">
-            <label>Minutes: </label><input type="number" name="minutes" id="minutes" style="width: 40px;" min="1" max="99" value="1"> <br>
-            <input type="button" value="sync" id="send">           
-        </form>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Microbit Timer</title>
+    <meta
+      name="description"
+      content="This web-app will sync with my microbit so i can use it as an alarm."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <button id="connect" onclick="uBitConnectDevice(uBitEventHandler)">
+      connect
+    </button>
+    <br />
+    <button id="sync" onclick="send()">
+      sync
+    </button>
 
-        <script src="/api.js" async defer></script>
-        <script async defer>
-            var connectedDevices = []
+    <script src="/api.js" async defer></script>
+    <script async defer>
+      var connectedDevices = [];
 
-            // Example event call-back handler
-            function uBitEventHandler(reason, device, data) {
-                switch(reason) {
-                    case "connected":
-                        alert("<b>Connected!</b>")
-                        connectedDevices.push(device)
-                        break
-                    case "disconnected":
-                        alert("<b>Disconnected</b>")
-                        connectedDevices = connectedDevices.filter( v => v != device)
-                        break
-                    case "connection failure":
-                        alert("<b>Connection Failure</b>")
-                        break
-                    case "error":
-                        alert("<b>Error</b>")                
-                        break
-                    case "console":
-                        alert("Console Data: " + data.data)
-                        break
-                    case "graph-event":
-                        alert(`Graph Event:  ${data.data} (for ${data.graph}${data.series.length?" / series "+data.series:""})`)
-                        break
-                    case "graph-data":
-                        alert(`Graph Data: ${data.data} (for ${data.graph}${data.series.length?" / series "+data.series:""})`)
-                        break
-                }
-            }
+      // Example event call-back handler
+      function uBitEventHandler(reason, device, data) {
+        switch (reason) {
+          case "connected":
+            alert("<b>Connected!</b>");
+            connectedDevices.push(device);
+            break;
+          case "disconnected":
+            alert("<b>Disconnected</b>");
+            connectedDevices = connectedDevices.filter(v => v != device);
+            break;
+          case "connection failure":
+            alert("<b>Connection Failure</b>");
+            break;
+          case "error":
+            alert("<b>Error</b>");
+            break;
+          case "console":
+            alert("Console Data: " + data.data);
+            break;
+          case "graph-event":
+            alert(
+              `Graph Event:  ${data.data} (for ${data.graph}${
+                data.series.length ? " / series " + data.series : ""
+              })`
+            );
+            break;
+          case "graph-data":
+            alert(
+              `Graph Data: ${data.data} (for ${data.graph}${
+                data.series.length ? " / series " + data.series : ""
+              })`
+            );
+            break;
+        }
+      }
 
-            function send() {
-                connectedDevices.forEach(d=>uBitSend(d, String(document.getElementById("minutes").value)))
-            }
-
-            document.getElementById("send").addEventListener("click", () => {send()})
-            document.getElementById("connect").addEventListener("click", () => { uBitConnectDevice(uBitEventHandler)})
-        </script>
-    </body>
+      function send() {
+        var date = new Date();
+        var hour = date.getHours();
+        var minute = date.getMinutes();
+        if (hour < 10) {
+          var hours = String("0" + hour);
+        } else {
+          hours = String(hour);
+        }
+        if (minute < 10) {
+          var minutes = String("0" + minute);
+        } else {
+          minutes = String(minute);
+        }
+        alert("h: " + hours + " m: " + minutes)
+        connectedDevices.forEach(d => uBitSend(d, hours + minutes));
+      }
+    </script>
+  </body>
 </html>
